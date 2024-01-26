@@ -17,7 +17,7 @@ spec:
         app: sample-app
     spec:
       containers:
-      - image: akilan/sample-app:v1
+      - image: SAMPLE_APP_IMAGE
         name: sample-app
         ports:
         - containerPort: 8080

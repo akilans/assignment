@@ -1,0 +1,29 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+    - echo Define variables & Logging in to ECR...
+    - echo Current working directory is `pwd`
+    - aws --version
+    - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+    - REPOSITORY_URI=$AWS_ECR_REPOSITORY_URI
+    - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+    - echo Building the Docker image...
+    - cd ../app
+    - docker build -t $REPOSITORY_URI:latest .
+    - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+  post_build:
+    commands:
+    - echo Pushing the Docker images...
+    - docker push $REPOSITORY_URI:latest
+    - docker push $REPOSITORY_URI:$IMAGE_TAG
+    - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+    - cd ../eks
+    - sed -i "s|SAMPLE_APP_IMAGE|${REPOSITORY_URI}:${IMAGE_TAG}|g" manifest.yaml
+    - cat manifest.yaml
+    - kubectl apply -f manifest.yaml
+    - printf '[{"name":"sample-app","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+artifacts:
+  files: imagedefinitions.json

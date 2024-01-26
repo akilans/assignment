@@ -52,3 +52,24 @@ terraform apply
 ```
 
 ![Terraform VPC Demo](https://raw.githubusercontent.com/akilans/assignment/main/images/terraform-vpc.gif)
+
+# Task 3
+
+- Create a EKS cluster in AWS by eksctl cli tool
+- Create k8s manifest file for the sample app deployment
+- Expose the app via loadbalancer
+- Access the app
+
+```bash
+cd eks
+eksctl create cluster -f cluster.yaml
+eksctl get cluster
+eksctl get nodegroup --cluster eks-test-1
+aws eks update-kubeconfig --region ap-south-1 --name eks-test-1
+kubectl apply -f manifest.yaml
+kubectl get pods
+kubectl get svc
+# access the loadbalancer http://abd966080f82943ca9cd41e100bcd64e-1313186370.ap-south-1.elb.amazonaws.com
+```
+
+![EKS Demo](https://raw.githubusercontent.com/akilans/assignment/main/images/eks.png)
