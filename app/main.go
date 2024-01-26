@@ -24,7 +24,7 @@ func welcomeHandler(w http.ResponseWriter, req *http.Request) {
 // handler for /health route
 func healthHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprintf(w, "<html><title>Health Check</title><body><h1>Healthy - V1</h1></body></html>")
+	fmt.Fprintf(w, "<html><title>Health Check</title><body><h1>Healthy - V2</h1></body></html>")
 }
 
 // main function
