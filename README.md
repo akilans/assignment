@@ -41,7 +41,10 @@ docker image push 738418786830.dkr.ecr.ap-south-1.amazonaws.com/sample-app:v1
 - Attach internet gateway to default route table of newly created VPC
 
 ```bash
+# Before running configure backend for storing state file
+# Used S3 bucket and DynamoDB table to store state file in remote backend
 # Create all the resources
+cd vpc-terraform-task
 terraform init
 terraform validate
 terraform plan
