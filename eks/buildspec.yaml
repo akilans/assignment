@@ -12,9 +12,6 @@ phases:
       - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $AWS_ECR_URL
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - echo Image tag is $IMAGE_TAG
-      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
-      - kubectl get nodes
-      - kubectl get pods
   build:
     commands:
       - echo Building the Docker image...
@@ -30,7 +27,12 @@ phases:
       - cd ../eks
       - sed -i "s|SAMPLE_APP_IMAGE|${AWS_ECR_REPOSITORY_URI}:${IMAGE_TAG}|g" manifest.yaml
       - cat manifest.yaml
+      - CREDENTIALS=$(aws sts assume-role --role-arn $EKS_KUBECTL_ROLE_ARN --role-session-name codebuild-kubectl --duration-seconds 900)
+      - export AWS_ACCESS_KEY_ID="$(echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId')"
+      - export AWS_SECRET_ACCESS_KEY="$(echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey')"
+      - export AWS_SESSION_TOKEN="$(echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken')"
+      - export AWS_EXPIRATION=$(echo ${CREDENTIALS} | jq -r '.Credentials.Expiration')
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+      - kubectl get nodes
+      - kubectl get pods
       - kubectl apply -f manifest.yaml
-      - printf '[{"name":"sample-app","imageUri":"%s"}]' ${AWS_ECR_REPOSITORY_URI}:${IMAGE_TAG} > imagedefinitions.json
-artifacts:
-  files: imagedefinitions.json
