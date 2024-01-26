@@ -69,7 +69,14 @@ aws eks update-kubeconfig --region ap-south-1 --name eks-test-1
 kubectl apply -f manifest.yaml
 kubectl get pods
 kubectl get svc
-# access the loadbalancer http://abd966080f82943ca9cd41e100bcd64e-1313186370.ap-south-1.elb.amazonaws.com
+# access the loadbalancer http://a1829fb565ca24f24b162f2d3bcba045-1064995584.ap-south-1.elb.amazonaws.com
 ```
 
 ![EKS Demo](https://raw.githubusercontent.com/akilans/assignment/main/images/eks.png)
+
+# Task 4
+
+- CI/CD for AWS EKS using github, Codebuild, ECR, IAM & Codepipeline
+- eks/buildspec.yaml is used to build and deploy sample app to EKS
+
+![EKS CI/CD Demo](https://raw.githubusercontent.com/akilans/assignment/main/images/eks-ci-cd.gif)
