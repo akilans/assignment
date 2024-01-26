@@ -32,3 +32,20 @@ docker image push 738418786830.dkr.ecr.ap-south-1.amazonaws.com/sample-app:v1
 ```
 
 ![Sample app Demo](https://raw.githubusercontent.com/akilans/assignment/main/images/sample-app.png)
+
+# Task 2
+
+- Create a VPC in AWS with your own CIDR choice using best practices
+- Create subnets in all AZs
+- Create internet gateway
+- Attach internet gateway to default route table of newly created VPC
+
+```bash
+# Create all the resources
+terraform init
+terraform validate
+terraform plan
+terraform apply
+```
+
+![Terraform VPC Demo](https://raw.githubusercontent.com/akilans/assignment/main/images/terraform-vpc.gif)
