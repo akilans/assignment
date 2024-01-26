@@ -2,28 +2,35 @@ version: 0.2
 phases:
   pre_build:
     commands:
-    - echo Define variables & Logging in to ECR...
-    - echo Current working directory is `pwd`
-    - aws --version
-    - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-    - REPOSITORY_URI=$AWS_ECR_REPOSITORY_URI
-    - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo Define variables and Logging in to ECR...
+      - echo Current working directory is `pwd`
+      - aws --version
+      - echo Region is $AWS_DEFAULT_REGION
+      - echo Cluster name is $EKS_CLUSTER_NAME
+      - echo AWS_ECR_REPOSITORY_URI is $AWS_ECR_REPOSITORY_URI
+      - echo AWS_ECR_URL is $AWS_ECR_URL
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $AWS_ECR_URL
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo Image tag is $IMAGE_TAG
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+      - kubectl get nodes
+      - kubectl get pods
   build:
     commands:
-    - echo Building the Docker image...
-    - cd ../app
-    - docker build -t $REPOSITORY_URI:latest .
-    - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      - echo Building the Docker image...
+      - ls -lrt
+      - cd app
+      - docker build -t ${AWS_ECR_REPOSITORY_URI}:latest .
+      - docker tag ${AWS_ECR_REPOSITORY_URI}:latest ${AWS_ECR_REPOSITORY_URI}:${IMAGE_TAG}
   post_build:
     commands:
-    - echo Pushing the Docker images...
-    - docker push $REPOSITORY_URI:latest
-    - docker push $REPOSITORY_URI:$IMAGE_TAG
-    - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
-    - cd ../eks
-    - sed -i "s|SAMPLE_APP_IMAGE|${REPOSITORY_URI}:${IMAGE_TAG}|g" manifest.yaml
-    - cat manifest.yaml
-    - kubectl apply -f manifest.yaml
-    - printf '[{"name":"sample-app","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo Pushing the Docker images...
+      - docker push ${AWS_ECR_REPOSITORY_URI}:latest
+      - docker push ${AWS_ECR_REPOSITORY_URI}:${IMAGE_TAG}
+      - cd ../eks
+      - sed -i "s|SAMPLE_APP_IMAGE|${AWS_ECR_REPOSITORY_URI}:${IMAGE_TAG}|g" manifest.yaml
+      - cat manifest.yaml
+      - kubectl apply -f manifest.yaml
+      - printf '[{"name":"sample-app","imageUri":"%s"}]' ${AWS_ECR_REPOSITORY_URI}:${IMAGE_TAG} > imagedefinitions.json
 artifacts:
   files: imagedefinitions.json
