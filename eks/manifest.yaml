@@ -1,0 +1,59 @@
+---
+# Deployment with resource request & limits, readiness & liveness probes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: sample-app
+  name: sample-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sample-app
+  template:
+    metadata:
+      labels:
+        app: sample-app
+    spec:
+      containers:
+      - image: akilan/sample-app:v1
+        name: sample-app
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 3         
+---
+
+# create service as type LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sample-app
+  name: sample-app-svc
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: sample-app
+  type: LoadBalancer

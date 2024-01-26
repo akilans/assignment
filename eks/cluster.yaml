@@ -1,0 +1,14 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: eks-test-1
+  region: ap-south-1
+
+managedNodeGroups:
+  - name: ng-1
+    minSize: 2
+    maxSize: 2
+    instanceTypes: ["t2.micro"]
+    ssh:
+      allow: true # will use ~/.ssh/id_rsa.pub as the default ssh key
